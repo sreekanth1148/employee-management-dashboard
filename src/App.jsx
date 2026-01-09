@@ -1,16 +1,25 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from "./components/employees/Dashboard";
+import React, { useState } from "react";
 import Login from "./components/auth/Login";
-
-import { useAuth } from "./context/AuthContext";
+import Dashboard from "./components/employees/Dashboard";
 
 export default function App() {
-  const { isLoggedIn } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("isLoggedIn") === "true"
+  );
 
-  return (
-    <Routes>
-      <Route path="/" element={isLoggedIn ? <Dashboard /> : <Login />} />
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+  const handleLogin = () => {
+    localStorage.setItem("isLoggedIn", "true");
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+  };
+
+  return isLoggedIn ? (
+    <Dashboard onLogout={handleLogout} />
+  ) : (
+    <Login onLogin={handleLogin} />
   );
 }

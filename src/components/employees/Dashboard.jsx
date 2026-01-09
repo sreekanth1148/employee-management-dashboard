@@ -1,74 +1,104 @@
-import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
-import EmployeeForm from "./EmployeeForm";
-import EmployeeTable from "./EmployeeTable";
+import React, { useState } from "react";
+import EmployeeForm from "../ui/EmployeeForm";
+import EmployeeTable from "../ui/EmployeeTable";
 
-export default function Dashboard() {
+export default function Dashboard({ onLogout }) {
   const [employees, setEmployees] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filterGender, setFilterGender] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [editingEmployee, setEditingEmployee] = useState(null);
-  const { logout } = useAuth();
+  const [editing, setEditing] = useState(null);
 
-  const handleAddOrUpdate = (emp) => {
-    if (editingEmployee) {
-      setEmployees((prev) =>
-        prev.map((e) => (e.id === emp.id ? emp : e))
-      );
-      setEditingEmployee(null);
-    } else {
-      setEmployees((prev) => [...prev, { ...emp, id: Date.now() }]);
-    }
+  const [search, setSearch] = useState("");
+  const [genderFilter, setGenderFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const addEmployee = (emp) => {
+    setEmployees((prev) => [...prev, emp]);
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this employee?")) {
+  const updateEmployee = (emp) => {
+    setEmployees((prev) => prev.map((e) => (e.id === emp.id ? emp : e)));
+    setEditing(null);
+  };
+
+  const deleteEmployee = (id) => {
+    if (window.confirm("Delete employee?")) {
       setEmployees((prev) => prev.filter((e) => e.id !== id));
     }
   };
 
   const filteredEmployees = employees.filter((e) => {
     return (
-      e.name.toLowerCase().includes(search.toLowerCase()) &&
-      (filterGender ? e.gender === filterGender : true) &&
-      (filterStatus ? String(e.active) === filterStatus : true)
+      (e.name || "").toLowerCase().includes(search.toLowerCase()) &&
+      (!genderFilter || e.gender === genderFilter) &&
+      (!stateFilter || e.state === stateFilter) &&
+      (statusFilter === ""
+        ? true
+        : statusFilter === "active"
+        ? e.active === true
+        : e.active === false)
     );
   });
 
   return (
-    <div className="dashboard-wrapper">
+    <div style={{ padding: 20 }}>
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 15,
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Employee Dashboard</h2>
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <h2>Employee Dashboard</h2>
-        <button className="logout-btn" onClick={logout}>Logout</button>
+        <div>
+          <button onClick={() => window.print()} style={{ marginRight: 8 }}>
+            Print
+          </button>
+          <button onClick={onLogout}>Logout</button>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+      {/* 🔍 SEARCH & FILTERS */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <input
-          placeholder="Search by name"
+          placeholder="Search name"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)}>
+        <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
           <option value="">All Genders</option>
-          <option>Male</option>
-          <option>Female</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
         </select>
 
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+        <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)}>
+          <option value="">All States</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+        </select>
+
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">All Status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
         </select>
       </div>
 
-      <EmployeeForm onAdd={handleAddOrUpdate} editingEmployee={editingEmployee} />
+      <EmployeeForm
+        onAdd={addEmployee}
+        editEmployee={editing}
+        onUpdate={updateEmployee}
+      />
+
       <EmployeeTable
         employees={filteredEmployees}
-        onEdit={setEditingEmployee}
-        onDelete={handleDelete}
+        onEdit={(e) => setEditing(e)}
+        onDelete={deleteEmployee}
       />
     </div>
   );
