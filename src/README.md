@@ -3,6 +3,10 @@
 ## Overview
 A React-based Employee Management Dashboard that provides authentication and core employee management features such as creating, updating, deleting, searching, and filtering employee records.
 
+## 🔗 Links
+- GitHub Repository: https://github.com/sreekanth1148/employee-management-dashboard  
+- Loom Demo Video: https://www.loom.com/share/ef97cd070ede491e8f7861681532b5a3  
+
 ## Tech Stack
 - React.js
 - Vite
